@@ -5,7 +5,7 @@ from MyRules import RuleCreateDeadline
 from vkbottle import  Keyboard, Text, EMPTY_KEYBOARD,  OpenLink
 
 from logic import ALL_ACTION
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @bot.on.private_message(text="k")
 async def show_keyboard(message):
@@ -120,7 +120,7 @@ async def table(message):
 
 
 @bot.on.private_message(text="Дедлайн")
-async def deadline(message):
+async def deadline_init(message):
     editor_id = message.from_id
     try:
         query = f''' SELECT table_id FROM bot_tableeditor WHERE editor_id = {editor_id}; '''
@@ -150,7 +150,7 @@ async def deadline(message):
 
 
 @bot.on.private_message(RuleCreateDeadline())
-async def deadline_context(message):
+async def deadline_create(message):
     if ALL_ACTION[1]:
         user_id = message.from_id
         if user_id in ALL_ACTION[1]:
@@ -173,13 +173,19 @@ async def deadline_context(message):
                     interval = text[-1].split()
                     interval = int(interval[0]) * d
 
-                    query = f''' INSERT INTO bot_deadline (context, deadline_time, table_id, interval, create_time) VALUES ('{context}', '{time}', '{chat_id}', '{interval}', '{datetime.now()}') '''
-                    
-                    try:
-                        cur.execute(query)
-                        conn.commit()
-                    except sqlite3.Error as e:
-                        await message.answer(f"ошибка, {e}")
+                    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # -> str
+                    now = datetime.strptime(now, "%Y-%m-%d %H:%M:%S") # -> datetime
+                    now = now + timedelta(hours=interval)
+                    if now >= time: 
+                        await message.answer("Интервал слишком большой")
                     else:
-                        await message.answer("дедлайн создан")
-                        del ALL_ACTION[1][user_id]
+                        query = f''' INSERT INTO bot_deadline (context, deadline_time, table_id, interval, create_time) VALUES ('{context}', '{time}', '{chat_id}', '{interval}', '{now}') '''
+                        
+                        try:
+                            cur.execute(query)
+                            conn.commit()
+                        except sqlite3.Error as e:
+                            await message.answer(f"ошибка, {e}")
+                        else:
+                            await message.answer("дедлайн создан")
+                            del ALL_ACTION[1][user_id]
