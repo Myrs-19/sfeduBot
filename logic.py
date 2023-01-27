@@ -1,9 +1,13 @@
-from vkbottle import EMPTY_KEYBOARD
 import random
-from db import cur, conn
+import re
 import sqlite3
-from bot import bot
+
+from vkbottle import EMPTY_KEYBOARD
 from datetime import datetime, timedelta
+
+from db import cur, conn
+from bot import bot
+from keyboards import KEYBOARD_BECOME_EDITOR, KEYBOARD_MENU
 
 
 ALL_ACTION ={
@@ -20,74 +24,77 @@ async def create_editor(chat_id, user_id):
             peer_id = user_id,
             message = f"Ошибка создания старосты, {e}",
             random_id= random.randint(1, 100),
-            keyboard=EMPTY_KEYBOARD
+            keyboard=KEYBOARD_BECOME_EDITOR
         )
     else:
         await bot.api.messages.send(
             peer_id = user_id,
             message = "Теперь вы староста этой беседы",
             random_id= random.randint(1, 100),
-            keyboard=EMPTY_KEYBOARD
+            keyboard=KEYBOARD_MENU
         )
-
-
-@bot.loop_wrapper.interval(seconds=5)
-async def check_deadline():
-    query = ''' SELECT table_id, context, create_time, deadline_time, interval, id FROM bot_deadline '''
-    try:
-        deadlines = cur.execute(query).fetchall()
-    except sqlite3.Error as e:
-        await bot.api.messages.send(
-            peer_id = 318544837,
-            message = f"Ошибка в функции интервале, {e}",
-            random_id = random.randint(1, 100)
-        )
-    else:
-        if deadlines:
-            for deadline in deadlines:
-                chat_id = deadline[0]
-                context = deadline[1]
-                create_time = datetime.strptime(deadline[2], "%Y-%m-%d %H:%M:%S")
-                deadline_time = datetime.strptime(deadline[3], "%Y-%m-%d %H:%M:%S")
-                interval = timedelta(hours=deadline[4])
-                id_deadline = deadline[5]
-                message = create_message_deadline(chat_id, context, create_time, deadline_time, interval, id_deadline)
-
-                if message:
-                    await bot.api.messages.send(
-                        peer_id = chat_id,
-                        message = message,
-                        random_id = random.randint(1, 100)
-                    )
 
 
 def create_message_deadline(chat_id, context, create_time: datetime, deadline_time: datetime, interval: timedelta, deadline_id):
-    '''  '''
+    ''' 
+
+    '''
     message = None
-    if (create_time) >= deadline_time:
+    now = datetime.now()
+    if (create_time) >= deadline_time or now >= deadline_time:
         # сообщение "дедлайн настал"
-        message = f"Дедлайн '{context}' настал"
+        message = f'''Дедлайн настал
+        
+{context}'''
         
         # удаление дедлайна
         query = f''' DELETE FROM bot_deadline WHERE id = {deadline_id}'''
         try:
             cur.execute(query)
             conn.commit()
-        except:
-            pass
+        except sqlite3.Error as e:
+            print('ERROR SQL', e)
 
-    elif datetime.now() >= create_time:
+    elif now >= create_time:
         # сообщение "напоминание"
-        how_long = deadline_time - datetime.now()
-        message = f"Напоминание\nДо конца дедлайна '{context}' Осталось: {how_long}\n Дедлайн в {deadline_time}"
+        how_long = deadline_time - now
+        how_long = get_how_long( str(how_long) )
+        deadline_time = datetime.strftime(deadline_time, "%H:%M %d.%m.%y")
+        message = f'''Напоминание
+
+{context} 
+
+До конца дедлайна осталось: {how_long}
+Дедлайн в {deadline_time}'''
         
         # изменение ячейки в таблице : create_time += interval
         create_time += interval
-        query = f''' UPDATE bot_deadline SET create_time = {create_time} WHERE id = {deadline_id}'''
+        query = f''' UPDATE bot_deadline SET create_time = '{create_time}' WHERE id = {deadline_id}'''
         try:
             cur.execute(query)
             conn.commit()
-        except:
-            pass
+        except sqlite3.Error as e:
+            print('ERROR SQL', e)
 
     return message
+
+
+def get_how_long(how_long: str) -> str:
+
+    # ищем подстроку 'чч:мм' в переданной строке
+    # \d - цифра, {min, max} минимальное количество и максимальное (в данном случае цифр)
+    s = re.search(r"\d{1,2}:\d{1,2}", how_long).group()
+
+    # ищем подстроку 'кол-во_дней days' - кол-во дней не определенно, поэтому {min, } 
+    # минимальное кол-во задано, а максимального нет, то есть сколько угодно цифр может быть перед ' days'
+    s_d = re.search(r"\d{1,} days, ", how_long)
+    
+    #если день один, то в строке вместо days будет day
+    if not s_d:
+        s_d = re.search(r"\d{1,} day, ", how_long)
+    # если подстроки с днями не было найдено, то метод возвратит NoneType
+    # если подстроку с днями нашлась, то метод group в данном случае возвращает найденную подстроку 
+    s_d = s_d.group() if s_d else s_d
+    s = s_d + s if s_d else s
+
+    return s
