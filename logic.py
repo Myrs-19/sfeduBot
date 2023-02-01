@@ -100,27 +100,24 @@ def get_how_long(how_long: str) -> str:
     return s
 
 
-def isVisokos(year):
+def is_visokos(year):
     '''
-    это функция призвана устанавливать факт, является ли год високосным
-    если да, то в году будет 366 дней вместо привычных 365
+    високосный год - 366 дней
+    обычный - 365
     '''
     if not year % 4:
         if not year % 100:
-
             if not year % 400:
-                return True  # год делиться кратен 100 и без остатка делиться на 400 (вискокосный)
-            else:
-                return False  # год кратен 100, но на 400 без остатка разделён быть не может (невискокосный)
+                return True  # год делиться кратен 100 и без остатка делиться на 400 (вискокосный)  
+            return False  # год кратен 100, но на 400 без остатка разделён быть не может (невискокосный)
 
         else:
             return True  # год кратен 4, но на 100 без остатка не делиться (високосный)
-    else:
-        return False  # год не делиться без остатка на 4 (невисокосный)
+    return False  # год не делиться без остатка на 4 (невисокосный)
 
 
 
-def offsetMonthFunction(month, year):
+def get_offset_month(month, year):
     '''
     нахождение смещения месяца
     функция принимает числовое значение int
@@ -133,82 +130,80 @@ def offsetMonthFunction(month, year):
         return 31
 
     elif 3 == month:  # месяц март
-        return 59 + isVisokos(year)
+        return 59 + is_visokos(year)
 
     elif 4 == month:  # месяц апрель
-        return 90 + isVisokos(year)
+        return 90 + is_visokos(year)
 
     elif 5 == month:  # месяц май
-        return 120 + isVisokos(year)
+        return 120 + is_visokos(year)
 
     elif 6 == month:  # месяц июль
-        return 151 + isVisokos(year)
+        return 151 + is_visokos(year)
 
     elif 7 == month:  # месяц июль
-        return 181 + isVisokos(year)
+        return 181 + is_visokos(year)
 
     elif 8 == month:  # месяц август
-        return 212 + isVisokos(year)
+        return 212 + is_visokos(year)
 
     elif 9 == month:  # месяц сентябрь
-        return 243 + isVisokos(year)
+        return 243 + is_visokos(year)
 
     elif 10 == month:  # месяц октябрь
-        return 273 + isVisokos(year)
+        return 273 + is_visokos(year)
 
     elif 11 == month:  # месяц ноябрь
-        return 304 + isVisokos(year)
+        return 304 + is_visokos(year)
 
     else:  # месяц декабрь
-        return 334 + isVisokos(year)
+        return 334 + is_visokos(year)
 
 
-def offsetYearFunction(year):
+def offset_year(year):
     '''
-    ниже определённая функция нужна для нахождения смещения номера дня от 2023 года
-    прибавляет только смещение полученное от текущего года до 2023 (текущий месяц с днём не учитываются)
-    функция принимает значения типа int
-    возвращает так же int
     из параметров принимает: 1) текущий год (он нужен непосредственно для вычислений), 2) смещение номера дня
     от 2023 года, которое в данный момент равно нулю. Потом функция возвращает вычисленное учитывающее только прошедшие года
     значение смещение дня от 2023 года
     '''
-    offsetYear = year - 2023  # нахождение разницы в годах
-    valueOfOffsetYearsForIterations = 0  # значение смещения, увеличивающееся с каждой итерацией
+    delta_year = year - 2023  # нахождение разницы в годах
+    offset = 0  # значение смещения, увеличивающееся с каждой итерацией
 
-    while offsetYear:
-        # прибавление годового смещения. Функция isVisokos принимает параметр "текущий год минус один",
+    while delta_year:
+        # прибавление годового смещения. Функция is_visokos принимает параметр "текущий год минус один",
         # потому что на високосность должны проверятся только предыдущие года до 2023 (не включая текущий!)
         # в году 365 дней, но в высокосном на один день больше, что учитывается
-        valueOfOffsetYearsForIterations += 365 + isVisokos(year - 1)
+        offset += 365 + is_visokos(year - 1)
 
         # проход каждого года до 2023
-        offsetYear -= 1
+        delta_year -= 1
 
         # нужно, чтобы каждый год до 2023 должен будет проверяться на високосность
         year -= 1
 
-    return valueOfOffsetYearsForIterations
+    return offset
 
 
-def fUpperOrLowerWeek():
+def is_upper_week():
     '''
     функция возвращает 0 (нижняя недель) или 1 (верхняя неделя)
-    daysFrom2023 - смещение номера дня от 2023
+    days_from_2023 - смещение номера дня от 2023
     Для работы функции было решено перевести текущую дату в "номер дня", отсчёт которого начинается с 2023 года"
     например:
-    для 1 января 2023 года daysFrom2023 будет равен 1;
-    1 февраля 2023 года - daysFrom2023 = 32;
-    1 января 2024 года - daysFrom2023 = 366;
-    3 марта 2024 года - daysFrom2023 = 426;
+    для 1 января 2023 года days_from_2023 будет равен 1;
+    1 февраля 2023 года - days_from_2023 = 32;
+    1 января 2024 года - days_from_2023 = 366;
+    3 марта 2024 года - days_from_2023 = 426;
     '''
-    presentDay = date.today()  # сегодняшняя дата (например, 2023-01-31)
-    # конвертируем datetime объект в строку вида Year-Month-Day, используя метод, присваиваем эти значения
-    # соответствующим им переменным
-    year, month, day = (int(i) for i in str(presentDay).split("-"))
 
-    daysFrom2023 = offsetYearFunction(year) + offsetMonthFunction(month, year) + day
-    return (daysFrom2023 + 5) // 7 % 2
+    today = date.today()
+    year = today.year
+    month = today.month
+    day = today.day
+
+    days_from_2023 = offset_year(year) + get_offset_month(month, year) + day
+
+    return (days_from_2023 + 5) // 7 % 2
 
 
 def get_info_para(current_time):
