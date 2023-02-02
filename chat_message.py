@@ -1,6 +1,6 @@
 from bot import bot
 from db import cur, conn
-from logic import create_message_deadline
+from logic import create_message_deadline, get_message_what_is_current_les, get_info_para_and_day, is_upper_week
 
 import sqlite3
 import random
@@ -50,9 +50,21 @@ async def init_chat(message):
 @bot.on.chat_message(text="какая сейчас пара")
 async def table_right_now(message):
     ''' in developing '''
-    chat_id = message.chat_id
+    number_para, number_day = get_info_para_and_day()
+    number_week = is_upper_week()
+    chat_id = message.chat_id + 2000000000
 
-    await message.answer('я не знаю')
+    text = get_message_what_is_current_les(
+        chat_id=chat_id, 
+        number_day=number_day,
+        number_para=number_para,
+        number_week=number_week
+        )
+
+    context = f"number_para: {number_para}; number_day: {number_day}; number_week: {number_week}"
+
+    await message.answer(context)
+
 
 
 # сообщение-напоминание с интевалом 5 минут

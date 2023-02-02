@@ -3,7 +3,7 @@ import re
 import sqlite3
 
 from vkbottle import EMPTY_KEYBOARD
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 
 from db import cur, conn
 from bot import bot
@@ -199,11 +199,12 @@ def is_upper_week():
     return (days_from_2023 + 5) // 7 % 2
 
 
-def get_info_para(current_time):
+def get_info_para_and_day():
     '''
-    функция выдаёт информацию о текущей паре
+    возвращает от текущего времени номер пары и дня недели
     возвращает кортеж: номер пары, день недели
     '''
+    current_time = datetime.now().time()
     # это переменные хранящие время пар (para_x - хранит время начала пары номер x)
     # все переменные - объекты datetime
     para_1start = datetime.strptime('8:00:00', '%H:%M:%S').time()
@@ -255,3 +256,10 @@ def get_info_para(current_time):
     day_of_week = datetime.now().weekday() + 1 # переменная хранит день недели от Понедельника (значение 1) до Воскресенья (значение 7)
 
     return current_para, day_of_week
+
+
+
+def get_message_what_is_current_les(chat_id, number_para, number_day, number_week):
+    ''' in developing '''
+    message = ''
+    return message
