@@ -43,9 +43,7 @@ def create_message_deadline(chat_id, context, create_time: datetime, deadline_ti
     now = datetime.now()
     if (create_time) >= deadline_time or now >= deadline_time:
         # сообщение "дедлайн настал"
-        message = f'''Дедлайн настал
-        
-{context}'''
+        message = f'''Дедлайн настал\n\n{context}'''
         
         # удаление дедлайна
         query = f''' DELETE FROM bot_deadline WHERE id = {deadline_id}'''
@@ -60,12 +58,7 @@ def create_message_deadline(chat_id, context, create_time: datetime, deadline_ti
         how_long = deadline_time - now
         how_long = get_how_long( str(how_long) )
         deadline_time = datetime.strftime(deadline_time, "%H:%M %d.%m.%y")
-        message = f'''Напоминание
-
-{context} 
-
-До конца дедлайна осталось: {how_long}
-Дедлайн в {deadline_time}'''
+        message = f'''Напоминание\n\n{context}\n\nДо конца дедлайна осталось: {how_long}\nДедлайн в {deadline_time}'''
         
         # изменение ячейки в таблице : create_time += interval
         create_time += interval
