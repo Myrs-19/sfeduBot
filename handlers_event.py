@@ -26,7 +26,7 @@ async def handle_message_event(event: MessageEvent):
             chat_id=None
 
         user_id = message_data.from_id
-        if action == 0: # создание старосты
+        if action == 0 and 'text' in meta_data: # создание старосты
             await create_editor(chat_id, user_id)
         elif action == 1: # создание дедлайна
             ALL_ACTION[1][user_id] = chat_id # добавляем данные для будущего действия (создания дедлайна)
