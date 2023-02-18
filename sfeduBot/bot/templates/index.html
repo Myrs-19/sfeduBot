@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet"> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script> -->
+
+
+    <title>Document</title>
+</head>
+<body>
+
+    {% if 'id_editor' in request.GET and 'id_chat' in request.GET or 'id_editor' in request.POST and 'id_chat' in request.POST %}
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+            aria-label="Slide 1"></button>
+
+          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"
+            class=""></button>
+
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" class=""
+            aria-label="Slide 3"></button>
+
+          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"
+            class=""></button>
+
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="4" class=""
+            aria-label="Slide 5"></button>
+          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="5" aria-label="Slide 6"
+             aria-current="true"></button>
+        </div>
+        
+        <form class="form" method='post'>
+          <input type="hidden" name='id_editor' value='{{id_editor}}'>
+          <input type="hidden" name='id_chat' value='{{id_chat}}'>
+            {% csrf_token %}
+        <div class="carousel-inner">
+    
+    
+    
+            {% for day, lesson_numbers in data.items %}
+            {% if day == 1 %}
+              <div class="carousel-item active">
+            {% else %}
+            <div class="carousel-item">
+            {% endif %}
+                <table class="table table-hover">
+                <thead>
+                  <td></td>
+                  <td></td>
+                  <th colspan="4">Верхняя неделя</th>
+                  <th colspan="4">Нижняя неделя</th>
+                </thead>
+                <thead>
+                  <td></td>
+                  <td class="table-active"></td>
+                  <td class="table-active">Предмет</td>
+                  <td class="table-active">Аудитория</td>
+                  <td class="table-active">Препод</td>
+                  <td class="table-active"></td>
+                  <td class="table-active">Предмет</td>
+                  <td class="table-active">Аудитория</td>
+                  <td class="table-active">Препод</td>
+                </thead>
+                <tbody>
+                  
+                  {% if day == 1 %}
+                  <th rowspan="8" scope="row">Понедельник</th>
+                  {% elif day == 2 %}
+                  <th rowspan="8" scope="row">Вторник</th>
+                  {% elif day == 3 %}
+                  <th rowspan="8" scope="row">Среда</th>
+                  {% elif day == 4 %}
+                  <th rowspan="8" scope="row">Четверг</th>
+                  {% elif day == 5 %}
+                  <th rowspan="8" scope="row">Пятница</th>
+                  {% elif day == 6 %}
+                  <th rowspan="8" scope="row">Суббота</th>
+                  {% endif %}
+
+
+                  {% for lesson_number, value in lesson_numbers.items %}
+                  
+                  <tr>
+                    <td>{{lesson_number}}.</td>
+
+                    {% if value.0.subject %}
+                    <td><input value="{{ value.0.subject }}" name="{{lesson_number}}.{{day}}.1.s" class="form-control" type="text" placeholder="Космология"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.1.s" class="form-control" type="text" placeholder="Космология"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                    {% if value.0.auditorium %}
+                    <td><input value="{{ value.0.auditorium }}" name="{{lesson_number}}.{{day}}.1.a" class="form-control" type="text" placeholder="1212"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.1.a" class="form-control" type="text" placeholder="1212"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                    {% if value.0.teacher %}
+                    <td><input value="{{ value.0.teacher }}" name="{{lesson_number}}.{{day}}.1.t" class="form-control" type="text" placeholder="Толмачев"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.1.t" class="form-control" type="text" placeholder="Толмачев"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                    <td>{{lesson_number}}.</td>
+
+                    {% if value.1.subject %}
+                    <td><input value="{{ value.1.subject }}" name="{{lesson_number}}.{{day}}.0.s" class="form-control" type="text" placeholder="Космология"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.0.s" class="form-control" type="text" placeholder="Космология"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                    {% if value.1.auditorium %}
+                    <td><input value="{{ value.1.auditorium }}" name="{{lesson_number}}.{{day}}.0.a" class="form-control" type="text" placeholder="1212"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.0.a" class="form-control" type="text" placeholder="1212"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                    {% if value.1.teacher %}
+                    <td><input value="{{ value.1.teacher }}" name="{{lesson_number}}.{{day}}.0.t" class="form-control" type="text" placeholder="Толмачев"
+                        aria-label="default input example"></td>
+                    {% else %}
+                    <td><input value="" name="{{lesson_number}}.{{day}}.0.t" class="form-control" type="text" placeholder="Толмачев"
+                      aria-label="default input example"></td>
+                    {% endif%}
+
+                  </tr>
+                  {% endfor %}
+    
+    
+    
+                </tbody>
+                </table>
+    
+    
+              </div>
+              {% endfor %}
+          
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" name="save">Сохранить</button>
+        </form>
+    
+    
+    
+        <button class="carousel-control-prev mybg" type="button" data-bs-target="#carouselExampleIndicators"
+          data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next mybg" type="button" data-bs-target="#carouselExampleIndicators"
+          data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+
+    {% else %}
+
+    <h1>Вы не староста</h1>
+
+    {% endif %}
+    
+    {{p}}
+    <br>
+    {{g}}
+    <br>
+    {{d}}
+
+</body>
+</html>
